@@ -1,0 +1,33 @@
+---
+  - hosts: all
+    tasks:
+
+      - name: Installing perl pre requirements and unzip
+        apt: pkg={{item}} state=present
+        with_items:
+         - libwww-perl
+         - libdatetime-perl
+         - libswitch-perl
+         - unzip
+
+      - name: Checking if cloudwatch already Downloaded to this machine
+        stat: path=~/aws-scripts-mon
+        register: cloudwatch_folder
+
+      - name: Downloading aws cloudwatch reporting script
+        get_url: url=http://ec2-downloads.s3.amazonaws.com/cloudwatch-samples/CloudWatchMonitoringScripts-v1.1.0.zip dest=/tmp/CloudWatchMonitoringScripts-v1.1.0.zip
+        when: not cloudwatch_folder.stat.exists
+
+      - name: Unzipping cloudwatch
+        unarchive: src=/tmp/CloudWatchMonitoringScripts-v1.1.0.zip dest=/opt copy=no
+        when: not cloudwatch_folder.stat.exists
+
+      - name: Add crontask about CloudWatch.
+        cron:
+          user: 'ubuntu'
+          name: 'Disk Space Cloudwatch'
+          minute: '*/1'
+          job: '/opt/aws-scripts-mon/mon-put-instance-data.pl --mem-used-incl-cache-buff --mem-util --disk-space-used --disk-space-avail --disk-path=/'
+          state: present
+        tags: cronjob
+

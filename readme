@@ -1,0 +1,8 @@
+Núvem utilizada: aws
+método de criação da máquina: aws-cli
+Terraform: provisionamento de alarmes
+Ansible: provisionamento docker e cron
+docker-file: provisionamento do front-end e back-end 
+traefik: monitoramento dos containers e proxy reverso
+Python: Código aws-lambda para apagar máquinas de teste automaticamente.
+escalabilidade: swarm e traefik

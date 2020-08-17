@@ -1,0 +1,31 @@
+import json
+import boto3
+import sys
+from datetime import datetime, timedelta
+
+
+
+def lambda_handler(event, context):
+
+    ec2 = boto3.resource('ec2')
+    ec2cli = boto3.client('ec2')
+    key_pair = ec2.KeyPair('name')
+    
+    horamaisum = datetime
+    
+    AllInstances=[instance.id for instance in ec2.instances.all()]
+    name = None
+    for instance in ec2.instances.all():
+        horamaisum = instance.launch_time + timedelta(minutes=60)
+    
+        for tag in instance.tags:
+            if tag['Key'] == 'Name':
+                name = tag.get('Value')
+        if name.find("PackProd") == 0 and instance.key_name.find("packer") == 0: #se possuir a palavra Packer no nome e na chave, faça
+            print (name)
+            print(instance.key_name)
+            if datetime.now().strftime("%d/%m/%Y") != instance.launch_time.strftime("%d/%m/%Y") or  horamaisum.strftime("%H:%M") <  datetime.now().strftime("%H:%M"):
+                instance.terminate()
+                ec2cli.delete_key_pair(KeyName=instance.key_name)
+              
+    return True
